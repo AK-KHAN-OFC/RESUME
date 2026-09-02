@@ -49,7 +49,7 @@
     var ctx = canvas.getContext('2d');
     var W, H, particles;
     var isMobile = window.innerWidth < 768;
-    var COUNT    = isMobile ? 25 : 50;
+    var COUNT    = isMobile ? 22 : 45;
 
     function resize() {
       W = canvas.width  = window.innerWidth;
@@ -63,10 +63,10 @@
       particles.push({
         x:  Math.random() * W,
         y:  Math.random() * H,
-        vx: (Math.random() - 0.5) * 0.22,
-        vy: (Math.random() - 0.5) * 0.22,
-        r:  Math.random() * 1.3 + 0.4,
-        o:  Math.random() * 0.22 + 0.04
+        vx: (Math.random() - 0.5) * 0.18,
+        vy: (Math.random() - 0.5) * 0.18,
+        r:  Math.random() * 1.2 + 0.3,
+        o:  Math.random() * 0.18 + 0.03
       });
     }
 
@@ -103,29 +103,36 @@
 
   var LINES = [
     { text: "You're entering Ayaan's space.", cls: '' },
-    { text: "A resume tells you where I am.", cls: '' },
-    { text: "This is what I'm building.",     cls: '' },
-    { text: "Safar abhi jaari hai.",           cls: 'urdu' },
-    { text: "Take a look around.",             cls: '' }
+    { text: "A resume tells you where I am.",  cls: '' },
+    { text: "This is what I'm building.",      cls: '' },
+    { text: "Safar abhi jaari hai.",            cls: 'urdu' },
+    { text: "Take a look around.",              cls: '' }
   ];
 
   if (introEl && !document.documentElement.classList.contains('direct-entry')) {
     initParticles();
 
-    /* Trigger dragon after second line begins */
+    /* ── DRAGON ─────────────────────────────────────────
+       Trigger after ~1.8s. Dragon flies right→left.
+       The SVG starts at translateX(100vw + 400px) in CSS.
+       Adding .fly triggers the dragonFly keyframe animation.
+    ──────────────────────────────────────────────────── */
     var dragonEl = document.getElementById('dragon-svg');
     setTimeout(function () {
       if (dragonEl) dragonEl.classList.add('fly');
-    }, 1900);
+    }, 1800);
 
-    /* Typing sequence */
+    /* ── TYPING SEQUENCE ─────────────────────────────── */
     var li = 0;
     var activeCursor = null;
 
     function nextLine() {
       if (li >= LINES.length) {
+        /* All lines done — remove cursor, show button */
         if (activeCursor) { activeCursor.remove(); activeCursor = null; }
-        setTimeout(function () { if (ibtnEl) ibtnEl.classList.add('vis'); }, 480);
+        setTimeout(function () {
+          if (ibtnEl) ibtnEl.classList.add('vis');
+        }, 500);
         return;
       }
       var cfg = LINES[li];
@@ -134,30 +141,42 @@
       var ts = document.createElement('span');
       ts.className = 'tt';
       p.appendChild(ts);
+
+      /* Move cursor to the new line */
       if (activeCursor) activeCursor.remove();
       activeCursor = document.createElement('span');
       activeCursor.className = 'cursor';
       activeCursor.setAttribute('aria-hidden', 'true');
       p.appendChild(activeCursor);
       ilinesEl.appendChild(p);
-      requestAnimationFrame(function () { p.classList.add('vis'); });
 
+      /* Fade-in the line */
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () { p.classList.add('vis'); });
+      });
+
+      /* Type characters one by one */
       var ci = 0, text = cfg.text;
+      /* Slightly slower for the Urdu line, standard for others */
+      var charDelay = cfg.cls === 'urdu' ? 38 : 30;
+
       function typeChar() {
         if (ci < text.length) {
           ts.textContent += text[ci++];
-          setTimeout(typeChar, 28);
+          setTimeout(typeChar, charDelay);
         } else {
           li++;
-          setTimeout(nextLine, 230);
+          /* Pause between lines */
+          setTimeout(nextLine, 260);
         }
       }
-      setTimeout(typeChar, 50);
+      setTimeout(typeChar, 60);
     }
 
-    setTimeout(nextLine, 380);
+    /* Start after a breath */
+    setTimeout(nextLine, 420);
 
-    /* Click anywhere on intro screen to advance (after 1.2s) */
+    /* Click anywhere on intro screen to skip typing (after 1.2s) */
     var canSkip = false;
     setTimeout(function () { canSkip = true; }, 1200);
     introEl.addEventListener('click', function (e) {
@@ -179,16 +198,21 @@
 
     var mascotScreen = document.getElementById('mascot-screen');
 
-    /* Crossfade: intro out, mascot in */
+    /* Cross-fade: intro fades out, mascot fades in simultaneously */
+    introEl.style.transition   = 'opacity .75s ease';
     introEl.style.opacity      = '0';
     introEl.style.pointerEvents = 'none';
-    if (mascotScreen) mascotScreen.classList.add('vis');
+
+    /* Mascot screen becomes visible while intro is still fading */
+    setTimeout(function () {
+      if (mascotScreen) mascotScreen.classList.add('vis');
+    }, 150);
 
     setTimeout(function () {
       introEl.style.display = 'none';
       stopParticles();
       if (mascotScreen) runMascotSequence();
-    }, 700);
+    }, 750);
   }
 
   /* ──────────────────────────────────────────────────────
@@ -202,47 +226,48 @@
 
     if (!wrap) { revealPortfolio(); return; }
 
-    /* 1. Slide mascot in from the left */
+    /* 1. Slide mascot in from the left — natural entrance */
     setTimeout(function () {
-      wrap.style.transition = 'transform .65s cubic-bezier(.2,0,.4,1), opacity .4s ease';
+      wrap.style.transition = 'transform .7s cubic-bezier(.22,1,.36,1), opacity .45s ease';
       wrap.style.transform  = 'translateX(0)';
       wrap.style.opacity    = '1';
-    }, 200);
+    }, 180);
 
     /* 2. Knock animation — arm extends toward screen */
     setTimeout(function () {
       if (mascotSvg) mascotSvg.classList.add('knocking');
       spawnRipple(wrap);
-      setTimeout(function () { spawnRipple(wrap); }, 220);
-    }, 1000);
+      /* Second knock ripple slightly delayed */
+      setTimeout(function () { spawnRipple(wrap); }, 240);
+    }, 1050);
 
     /* 3. Arm returns to rest */
     setTimeout(function () {
       if (mascotSvg) mascotSvg.classList.remove('knocking');
-    }, 1600);
+    }, 1700);
 
     /* 4. Speech bubble 1: acknowledgment */
     setTimeout(function () {
       showSpeech(speechEl, 'Oh, you made it.');
-    }, 1900);
+    }, 2000);
 
     /* 5. Speech bubble 2: invitation */
     setTimeout(function () {
       hideSpeech(speechEl);
       setTimeout(function () {
         showSpeech(speechEl, "Come on. I'll show you around.");
-      }, 360);
-    }, 3500);
+      }, 400);
+    }, 3700);
 
-    /* 6. Wave gesture — mascot gestures toward the portfolio */
+    /* 6. Wave gesture */
     setTimeout(function () {
       if (mascotSvg) mascotSvg.classList.add('waving');
-    }, 3750);
+    }, 4000);
 
     /* 7. Follow Me button appears */
     setTimeout(function () {
       if (followBtn) followBtn.classList.add('on');
-    }, 4000);
+    }, 4300);
 
     /* Follow Me click handler */
     if (followBtn) {
@@ -269,36 +294,41 @@
     var r = document.createElement('div');
     r.className = 'knock-ripple';
     parent.appendChild(r);
-    setTimeout(function () { if (r.parentNode) r.parentNode.removeChild(r); }, 850);
+    setTimeout(function () { if (r.parentNode) r.parentNode.removeChild(r); }, 860);
   }
 
+  /* ──────────────────────────────────────────────────────
+     FOLLOW ME → PORTFOLIO TRANSITION
+  ────────────────────────────────────────────────────── */
   function walkOffAndReveal(mascotSvg, speechEl, wrap) {
     var mScreen = document.getElementById('mascot-screen');
 
-    /* Clear all states */
+    /* Clear arm states, hide speech */
     if (mascotSvg) mascotSvg.classList.remove('knocking', 'waving');
     hideSpeech(speechEl);
 
-    /* Mascot walks off to the right */
+    /* Mascot walks off right — slightly accelerating */
     if (wrap) {
-      wrap.style.transition = 'transform .75s cubic-bezier(.55,0,1,.7), opacity .5s .2s ease';
-      wrap.style.transform  = 'translateX(130vw)';
+      wrap.style.transition = 'transform .8s cubic-bezier(.55,0,1,.65), opacity .55s .15s ease';
+      wrap.style.transform  = 'translateX(140vw)';
       wrap.style.opacity    = '0';
     }
 
-    /* Mascot screen fades out, portfolio fades in */
+    /* Mascot screen begins fading; portfolio starts revealing underneath */
     setTimeout(function () {
       if (mScreen) {
-        mScreen.style.transition = 'opacity .7s ease';
+        mScreen.style.transition = 'opacity .8s ease';
         mScreen.style.opacity    = '0';
         mScreen.style.pointerEvents = 'none';
       }
+      /* Portfolio fade-in starts as mascot exits */
       revealPortfolio();
-    }, 380);
+    }, 320);
 
+    /* Clean up mascot screen from DOM */
     setTimeout(function () {
       if (mScreen) mScreen.style.display = 'none';
-    }, 1300);
+    }, 1400);
   }
 
   /* ──────────────────────────────────────────────────────
@@ -324,10 +354,15 @@
     skipAllBtn.addEventListener('click', function () {
       var intro  = document.getElementById('intro');
       var mascot = document.getElementById('mascot-screen');
-      if (intro)  intro.style.display  = 'none';
-      if (mascot) mascot.style.display = 'none';
+      if (intro)  { intro.style.opacity = '0'; intro.style.pointerEvents = 'none'; }
+      if (mascot) { mascot.style.opacity = '0'; mascot.style.pointerEvents = 'none'; }
       stopParticles();
-      revealPortfolio();
+      /* Small delay so the fade is visible */
+      setTimeout(function () {
+        if (intro)  intro.style.display  = 'none';
+        if (mascot) mascot.style.display = 'none';
+        revealPortfolio();
+      }, 200);
     });
   }
 
@@ -390,7 +425,6 @@
   /* ──────────────────────────────────────────────────────
      PORTFOLIO INIT
      Called once after the overlay sequence ends.
-     Initialises all observers and interactions.
   ────────────────────────────────────────────────────── */
   var portfolioInitialized = false;
 
@@ -486,16 +520,17 @@
       achItems.forEach(function (el) { achObs.observe(el); });
     }
 
-    /* Skill bar animation */
+    /* Skill bar animation — FIXED: animate width, not scaleX */
     var skCards = document.querySelectorAll('.sk-card');
     if (skCards.length) {
       var skObs = new IntersectionObserver(function (entries) {
         entries.forEach(function (e) {
           if (e.isIntersecting) {
-            var card = e.target;
-            card.classList.add('anim');
-            var fill = card.querySelector('.sk-fill');
-            if (fill) fill.style.width = fill.getAttribute('data-w') || '100%';
+            var fill = e.target.querySelector('.sk-fill');
+            if (fill) {
+              /* data-w e.g. "70%" — set as the width directly */
+              fill.style.width = fill.getAttribute('data-w') || '100%';
+            }
           }
         });
       }, { threshold: 0.25 });
