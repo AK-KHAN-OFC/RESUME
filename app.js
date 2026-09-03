@@ -49,7 +49,7 @@
     var ctx = canvas.getContext('2d');
     var W, H, particles;
     var isMobile = window.innerWidth < 768;
-    var COUNT    = isMobile ? 22 : 45;
+    var COUNT    = isMobile ? 25 : 50;
 
     function resize() {
       W = canvas.width  = window.innerWidth;
@@ -63,10 +63,10 @@
       particles.push({
         x:  Math.random() * W,
         y:  Math.random() * H,
-        vx: (Math.random() - 0.5) * 0.18,
-        vy: (Math.random() - 0.5) * 0.18,
-        r:  Math.random() * 1.2 + 0.3,
-        o:  Math.random() * 0.18 + 0.03
+        vx: (Math.random() - 0.5) * 0.22,
+        vy: (Math.random() - 0.5) * 0.22,
+        r:  Math.random() * 1.3 + 0.4,
+        o:  Math.random() * 0.22 + 0.04
       });
     }
 
@@ -103,36 +103,29 @@
 
   var LINES = [
     { text: "You're entering Ayaan's space.", cls: '' },
-    { text: "A resume tells you where I am.",  cls: '' },
-    { text: "This is what I'm building.",      cls: '' },
-    { text: "Safar abhi jaari hai.",            cls: 'urdu' },
-    { text: "Take a look around.",              cls: '' }
+    { text: "A resume tells you where I am.", cls: '' },
+    { text: "This is what I'm building.",     cls: '' },
+    { text: "Safar abhi jaari hai.",           cls: 'urdu' },
+    { text: "Take a look around.",             cls: '' }
   ];
 
   if (introEl && !document.documentElement.classList.contains('direct-entry')) {
     initParticles();
 
-    /* ── DRAGON ─────────────────────────────────────────
-       Trigger after ~1.8s. Dragon flies right→left.
-       The SVG starts at translateX(100vw + 400px) in CSS.
-       Adding .fly triggers the dragonFly keyframe animation.
-    ──────────────────────────────────────────────────── */
+    /* Trigger dragon after second line begins */
     var dragonEl = document.getElementById('dragon-svg');
     setTimeout(function () {
       if (dragonEl) dragonEl.classList.add('fly');
-    }, 1800);
+    }, 1900);
 
-    /* ── TYPING SEQUENCE ─────────────────────────────── */
+    /* Typing sequence */
     var li = 0;
     var activeCursor = null;
 
     function nextLine() {
       if (li >= LINES.length) {
-        /* All lines done — remove cursor, show button */
         if (activeCursor) { activeCursor.remove(); activeCursor = null; }
-        setTimeout(function () {
-          if (ibtnEl) ibtnEl.classList.add('vis');
-        }, 500);
+        setTimeout(function () { if (ibtnEl) ibtnEl.classList.add('vis'); }, 480);
         return;
       }
       var cfg = LINES[li];
@@ -141,42 +134,33 @@
       var ts = document.createElement('span');
       ts.className = 'tt';
       p.appendChild(ts);
-
-      /* Move cursor to the new line */
       if (activeCursor) activeCursor.remove();
       activeCursor = document.createElement('span');
       activeCursor.className = 'cursor';
       activeCursor.setAttribute('aria-hidden', 'true');
       p.appendChild(activeCursor);
       ilinesEl.appendChild(p);
-
-      /* Fade-in the line */
+      /* Double rAF: ensures element is laid out before transition triggers */
       requestAnimationFrame(function () {
         requestAnimationFrame(function () { p.classList.add('vis'); });
       });
 
-      /* Type characters one by one */
       var ci = 0, text = cfg.text;
-      /* Slightly slower for the Urdu line, standard for others */
-      var charDelay = cfg.cls === 'urdu' ? 38 : 30;
-
       function typeChar() {
         if (ci < text.length) {
           ts.textContent += text[ci++];
-          setTimeout(typeChar, charDelay);
+          setTimeout(typeChar, 28);
         } else {
           li++;
-          /* Pause between lines */
-          setTimeout(nextLine, 260);
+          setTimeout(nextLine, 230);
         }
       }
-      setTimeout(typeChar, 60);
+      setTimeout(typeChar, 50);
     }
 
-    /* Start after a breath */
-    setTimeout(nextLine, 420);
+    setTimeout(nextLine, 380);
 
-    /* Click anywhere on intro screen to skip typing (after 1.2s) */
+    /* Click anywhere on intro screen to advance (after 1.2s) */
     var canSkip = false;
     setTimeout(function () { canSkip = true; }, 1200);
     introEl.addEventListener('click', function (e) {
@@ -198,21 +182,17 @@
 
     var mascotScreen = document.getElementById('mascot-screen');
 
-    /* Cross-fade: intro fades out, mascot fades in simultaneously */
-    introEl.style.transition   = 'opacity .75s ease';
+    /* Crossfade: intro out, mascot in simultaneously */
     introEl.style.opacity      = '0';
     introEl.style.pointerEvents = 'none';
-
-    /* Mascot screen becomes visible while intro is still fading */
-    setTimeout(function () {
-      if (mascotScreen) mascotScreen.classList.add('vis');
-    }, 150);
+    if (mascotScreen) mascotScreen.classList.add('vis');
+    /* Start mascot sequence immediately — no blank screen gap */
+    if (mascotScreen) runMascotSequence();
 
     setTimeout(function () {
       introEl.style.display = 'none';
       stopParticles();
-      if (mascotScreen) runMascotSequence();
-    }, 750);
+    }, 700);
   }
 
   /* ──────────────────────────────────────────────────────
@@ -226,48 +206,50 @@
 
     if (!wrap) { revealPortfolio(); return; }
 
-    /* 1. Slide mascot in from the left — natural entrance */
-    setTimeout(function () {
-      wrap.style.transition = 'transform .7s cubic-bezier(.22,1,.36,1), opacity .45s ease';
-      wrap.style.transform  = 'translateX(0)';
-      wrap.style.opacity    = '1';
-    }, 180);
+    /* 1. Slide mascot in — begins as mascot screen fades in */
+    /* Use rAF to ensure transition fires after initial render */
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        wrap.style.transition = 'transform .65s cubic-bezier(.2,0,.4,1), opacity .4s ease';
+        wrap.style.transform  = 'translateX(0)';
+        wrap.style.opacity    = '1';
+      });
+    });
 
     /* 2. Knock animation — arm extends toward screen */
     setTimeout(function () {
       if (mascotSvg) mascotSvg.classList.add('knocking');
       spawnRipple(wrap);
-      /* Second knock ripple slightly delayed */
-      setTimeout(function () { spawnRipple(wrap); }, 240);
-    }, 1050);
+      setTimeout(function () { spawnRipple(wrap); }, 220);
+    }, 1000);
 
     /* 3. Arm returns to rest */
     setTimeout(function () {
       if (mascotSvg) mascotSvg.classList.remove('knocking');
-    }, 1700);
+    }, 1600);
 
     /* 4. Speech bubble 1: acknowledgment */
     setTimeout(function () {
       showSpeech(speechEl, 'Oh, you made it.');
-    }, 2000);
+    }, 1900);
 
     /* 5. Speech bubble 2: invitation */
     setTimeout(function () {
       hideSpeech(speechEl);
       setTimeout(function () {
         showSpeech(speechEl, "Come on. I'll show you around.");
-      }, 400);
-    }, 3700);
+      }, 360);
+    }, 3500);
 
-    /* 6. Wave gesture */
+    /* 6. Wave gesture — fires after speech-2 is readable (~4100ms) */
     setTimeout(function () {
       if (mascotSvg) mascotSvg.classList.add('waving');
-    }, 4000);
+    }, 4400);
 
-    /* 7. Follow Me button appears */
+    /* 7. Follow Me button appears — 300ms after wave */
     setTimeout(function () {
       if (followBtn) followBtn.classList.add('on');
-    }, 4300);
+    }, 4700);
 
     /* Follow Me click handler */
     if (followBtn) {
@@ -294,41 +276,36 @@
     var r = document.createElement('div');
     r.className = 'knock-ripple';
     parent.appendChild(r);
-    setTimeout(function () { if (r.parentNode) r.parentNode.removeChild(r); }, 860);
+    setTimeout(function () { if (r.parentNode) r.parentNode.removeChild(r); }, 850);
   }
 
-  /* ──────────────────────────────────────────────────────
-     FOLLOW ME → PORTFOLIO TRANSITION
-  ────────────────────────────────────────────────────── */
   function walkOffAndReveal(mascotSvg, speechEl, wrap) {
     var mScreen = document.getElementById('mascot-screen');
 
-    /* Clear arm states, hide speech */
+    /* Clear all states */
     if (mascotSvg) mascotSvg.classList.remove('knocking', 'waving');
     hideSpeech(speechEl);
 
-    /* Mascot walks off right — slightly accelerating */
+    /* Mascot walks off to the right */
     if (wrap) {
-      wrap.style.transition = 'transform .8s cubic-bezier(.55,0,1,.65), opacity .55s .15s ease';
-      wrap.style.transform  = 'translateX(140vw)';
+      wrap.style.transition = 'transform .75s cubic-bezier(.55,0,1,.7), opacity .5s .2s ease';
+      wrap.style.transform  = 'translateX(130vw)';
       wrap.style.opacity    = '0';
     }
 
-    /* Mascot screen begins fading; portfolio starts revealing underneath */
+    /* Mascot screen fades out, portfolio fades in */
     setTimeout(function () {
       if (mScreen) {
-        mScreen.style.transition = 'opacity .8s ease';
+        mScreen.style.transition = 'opacity .7s ease';
         mScreen.style.opacity    = '0';
         mScreen.style.pointerEvents = 'none';
       }
-      /* Portfolio fade-in starts as mascot exits */
       revealPortfolio();
-    }, 320);
+    }, 380);
 
-    /* Clean up mascot screen from DOM */
     setTimeout(function () {
       if (mScreen) mScreen.style.display = 'none';
-    }, 1400);
+    }, 1300);
   }
 
   /* ──────────────────────────────────────────────────────
@@ -339,7 +316,7 @@
   function revealPortfolio() {
     if (portfolioRevealed) return;
     portfolioRevealed = true;
-    try { localStorage.setItem('ak_v', '1'); } catch (e) {}
+    try { localStorage.setItem('ak_v2', '1'); } catch (e) {}
     var skipBtn = document.getElementById('skip-all');
     if (skipBtn) skipBtn.style.display = 'none';
     document.documentElement.classList.add('portfolio-visible');
@@ -354,15 +331,10 @@
     skipAllBtn.addEventListener('click', function () {
       var intro  = document.getElementById('intro');
       var mascot = document.getElementById('mascot-screen');
-      if (intro)  { intro.style.opacity = '0'; intro.style.pointerEvents = 'none'; }
-      if (mascot) { mascot.style.opacity = '0'; mascot.style.pointerEvents = 'none'; }
+      if (intro)  intro.style.display  = 'none';
+      if (mascot) mascot.style.display = 'none';
       stopParticles();
-      /* Small delay so the fade is visible */
-      setTimeout(function () {
-        if (intro)  intro.style.display  = 'none';
-        if (mascot) mascot.style.display = 'none';
-        revealPortfolio();
-      }, 200);
+      revealPortfolio();
     });
   }
 
@@ -425,6 +397,7 @@
   /* ──────────────────────────────────────────────────────
      PORTFOLIO INIT
      Called once after the overlay sequence ends.
+     Initialises all observers and interactions.
   ────────────────────────────────────────────────────── */
   var portfolioInitialized = false;
 
@@ -520,17 +493,16 @@
       achItems.forEach(function (el) { achObs.observe(el); });
     }
 
-    /* Skill bar animation — FIXED: animate width, not scaleX */
+    /* Skill bar animation */
     var skCards = document.querySelectorAll('.sk-card');
     if (skCards.length) {
       var skObs = new IntersectionObserver(function (entries) {
         entries.forEach(function (e) {
           if (e.isIntersecting) {
-            var fill = e.target.querySelector('.sk-fill');
-            if (fill) {
-              /* data-w e.g. "70%" — set as the width directly */
-              fill.style.width = fill.getAttribute('data-w') || '100%';
-            }
+            var card = e.target;
+            card.classList.add('anim');
+            var fill = card.querySelector('.sk-fill');
+            if (fill) fill.style.width = fill.getAttribute('data-w') || '100%';
           }
         });
       }, { threshold: 0.25 });

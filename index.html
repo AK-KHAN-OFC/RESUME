@@ -14,7 +14,7 @@
   <!-- Bypass intro for return visitors and prefers-reduced-motion users before first paint -->
   <script>
   try {
-    if (localStorage.getItem('ak_v') ||
+    if (localStorage.getItem('ak_v2') ||
         window.matchMedia('(prefers-reduced-motion:reduce)').matches) {
       document.documentElement.classList.add('direct-entry');
     }
@@ -43,127 +43,190 @@
     <div id="lsweep" aria-hidden="true"></div>
 
     <!-- ─── DRAGON SILHOUETTE ───────────────────────────────
-         A small elegant flying dragon passing through the dark.
-         Dragon faces LEFT (moves right→left across viewport).
-         ViewBox: 0 0 320 160
-         Anatomy: snout→head→neck→body→tail / wings above+below
-         #dragon-all: body drift (CSS animation, vertical float)
+         A distant creature passing through the darkness.
+         Faces left (head at SVG left, tail at right).
+         ViewBox 0 0 580 230
+         #dragon-all: vertical body drift (CSS animation)
+         #db: static body, neck, head, tail, legs
          #dw: wing group (rotates for wing beat)
     ──────────────────────────────────────────────────────── -->
     <div id="dragon-wrap" aria-hidden="true">
-      <svg id="dragon-svg" viewBox="0 0 320 160"
+      <svg id="dragon-svg" viewBox="0 0 480 180"
            xmlns="http://www.w3.org/2000/svg"
            role="img" aria-label="Dragon silhouette">
         <g id="dragon-all">
 
-          <!-- ── BODY PARTS (slightly lighter fill for solidity) ── -->
-          <g fill="#3a5475">
+          <!-- ═══ BODY GROUP ═══════════════════════════════
+               Fill: #587aaa — readable at 0.72 opacity
+               against background #03060c.
+          ════════════════════════════════════════════════ -->
+          <g fill="#587aaa">
 
-            <!-- Main body — tapered teardrop, wider at shoulder -->
-            <path d="M230,88 C230,72 215,62 195,60
-                     C175,58 115,62 95,72
-                     C78,80 75,92 85,100
-                     C95,108 130,110 165,108
-                     C200,106 230,104 230,88 Z"/>
+            <!-- BODY — tapered teardrop. Wide at chest (left),
+                 narrows steadily to tail root (right).
+                 Top line arcs up; bottom line is flatter. -->
+            <path d="M 95,82
+                     C 110,72 145,68 180,68
+                     C 230,68 285,72 310,82
+                     C 320,86 322,96 312,102
+                     C 290,110 240,114 185,113
+                     C 145,112 110,108 95,100
+                     C 85,96 85,88 95,82 Z"/>
 
-            <!-- Neck — curves from body to head, narrows -->
-            <path d="M95,72 C85,68 72,62 60,58
-                     C50,55 42,56 38,62
-                     C45,57 53,57 63,60
-                     C73,63 84,68 93,74 Z"/>
+            <!-- NECK — tapers from body left edge to head.
+                 Follows a slight downward curve. -->
+            <path d="M 95,82
+                     C 80,78 65,76 52,80
+                     C 42,83 38,88 42,94
+                     C 48,90 55,87 65,84
+                     C 75,81 86,81 95,84 Z"/>
 
-            <!-- Head — angular, slightly wedge-shaped -->
-            <path d="M38,62 C30,56 20,53 12,57
-                     C6,60 4,68 9,75
-                     C14,82 24,82 32,77
-                     C34,82 40,85 44,80 Z"/>
+            <!-- HEAD — angular wedge, wider at jaw than crown.
+                 Clear distinct shape from neck. -->
+            <path d="M 42,80
+                     C 32,74 18,72 10,80
+                     C 4,86 6,96 16,101
+                     C 26,106 40,102 46,94
+                     C 50,100 56,103 58,97
+                     C 54,90 48,84 42,80 Z"/>
 
-            <!-- Upper snout / jaw — pointed forward -->
-            <path d="M12,57 C6,50 0,51 0,58
-                     C1,51 6,49 13,55 Z"/>
+            <!-- SNOUT — distinct forward protrusion above jaw.
+                 This is the key feature that reads as "dragon"
+                 at small sizes. Bold enough to survive 200px. -->
+            <path d="M 10,80
+                     C 4,73 0,72 0,80
+                     C 0,73 4,71 11,78 Z"/>
 
-            <!-- Lower jaw — slight opening -->
-            <path d="M9,75 C15,82 25,83 33,77
-                     C24,82 14,81 9,76 Z"/>
+            <!-- UPPER JAW LINE — slight separation from snout -->
+            <path d="M 10,80 C 6,76 2,75 0,79" stroke="#587aaa" stroke-width="2" fill="none" stroke-linecap="round"/>
 
-            <!-- Horn — single elegant backward-swept horn -->
-            <path d="M22,55 C24,46 28,38 30,33
-                     C29,39 25,47 23,56 Z"/>
-            <!-- Small secondary horn nub -->
-            <path d="M28,57 C30,51 33,46 34,43
-                     C33,49 30,53 29,58 Z" opacity="0.65"/>
+            <!-- LOWER JAW — gives the head depth and weight -->
+            <path d="M 16,101
+                     C 24,107 38,107 46,97
+                     C 38,104 24,105 16,102 Z"/>
 
-            <!-- Eye — the signature detail -->
-            <circle cx="20" cy="64" r="4.5" fill="#08152e"/>
-            <circle cx="20" cy="64" r="3"   fill="#3d6eff" opacity="0.9"/>
-            <circle cx="21.2" cy="62.8" r="1.1" fill="white" opacity="0.85"/>
+            <!-- HORN — single swept-back horn. Bold enough to read.
+                 Base at crown (28,76), tip curves back to (42,54). -->
+            <path d="M 28,76
+                     C 30,66 34,56 38,50
+                     C 36,57 33,67 30,77 Z"/>
+            <!-- Horn ridge — adds mass so it doesn't disappear at small size -->
+            <path d="M 30,74
+                     C 33,64 37,55 40,50
+                     C 38,57 34,66 31,75 Z" opacity="0.55"/>
 
-            <!-- Tail — long sweeping S-curve with spike tip -->
-            <path d="M230,90 C248,88 268,90 282,97
-                     C292,102 298,105 305,100
-                     C297,104 290,101 279,94
-                     C264,86 244,84 230,86 Z"/>
-            <path d="M303,100 C312,95 318,88 316,83
-                     C315,89 310,95 302,99 Z"/>
-            <!-- Tail diamond tip -->
-            <path d="M315,83 L320,90 L312,78 Z"/>
-            <!-- Dorsal tail spine -->
-            <path d="M268,84 C270,75 274,67 276,63
-                     C274,70 271,78 268,86 Z" opacity="0.7"/>
-            <!-- Second dorsal spine on body -->
-            <path d="M210,60 C212,50 215,41 217,37
-                     C215,44 212,52 210,62 Z" opacity="0.6"/>
+            <!-- EYE — the signature element. Blue iris visible at all sizes. -->
+            <circle cx="28" cy="88" r="6"   fill="#0a1530"/>
+            <circle cx="28" cy="88" r="4"   fill="#3d6eff" opacity="0.92"/>
+            <circle cx="29.5" cy="86.5" r="1.5" fill="white" opacity="0.85"/>
 
-            <!-- Front leg — extended slightly, claws visible -->
-            <path d="M140,108 C138,116 136,124 134,129" stroke="#3a5475" stroke-width="5" fill="none" stroke-linecap="round"/>
-            <!-- Claw toes -->
-            <path d="M134,129 C130,133 127,135 126,133" stroke="#3a5475" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-            <path d="M134,129 C133,134 131,137 130,136" stroke="#3a5475" stroke-width="2" fill="none" stroke-linecap="round"/>
-            <path d="M134,129 C136,133 136,136 135,137" stroke="#3a5475" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <!-- DORSAL SPINE 1 — on shoulder hump -->
+            <path d="M 195,68
+                     C 197,58 200,48 202,44
+                     C 200,51 197,61 195,70 Z" opacity="0.65"/>
 
-            <!-- Rear leg — folded in flight -->
-            <path d="M185,106 C183,115 181,122 179,127" stroke="#3a5475" stroke-width="4.5" fill="none" stroke-linecap="round" opacity="0.7"/>
-            <path d="M179,127 C175,131 172,132 171,130" stroke="#3a5475" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.6"/>
-            <path d="M179,127 C177,132 175,134 174,133" stroke="#3a5475" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0.55"/>
+            <!-- DORSAL SPINE 2 — mid-body -->
+            <path d="M 240,68
+                     C 242,59 245,50 246,46
+                     C 244,53 241,63 240,70 Z" opacity="0.55"/>
 
-          </g>
+            <!-- TAIL — long sweeping S-curve.
+                 Starts at body right, sweeps up then down.
+                 Key: must be long to read as a tail, not a stub. -->
+            <path d="M 310,90
+                     C 335,86 365,86 390,92
+                     C 410,97 428,102 445,98
+                     C 428,101 409,97 389,90
+                     C 364,83 335,82 310,86 Z"/>
+            <!-- Tail second section — continues the S -->
+            <path d="M 443,98
+                     C 455,94 464,88 467,83
+                     C 462,88 453,93 442,97 Z"/>
+            <!-- TAIL TIP — diamond spike. Bold enough to read at 200px. -->
+            <path d="M 466,83 L 474,90 L 466,76 Z"/>
+            <!-- Tail dorsal spine -->
+            <path d="M 405,84
+                     C 407,74 410,64 412,60
+                     C 410,67 407,77 405,86 Z" opacity="0.62"/>
 
-          <!-- ── WING GROUP — animated wing beat ── -->
-          <!-- Wings attach at shoulder area (~190,70) -->
-          <!-- fill slightly darker = thin membrane feel -->
-          <g id="dw" fill="#253d5a">
+            <!-- FRONT LEG — extended, key for "flying dragon" read.
+                 Hangs from belly at x=160. Three claws spread slightly. -->
+            <path d="M 160,113 C 158,123 156,131 154,137"
+                  stroke="#587aaa" stroke-width="7" fill="none" stroke-linecap="round"/>
+            <!-- Claw 1 — leftmost, longest -->
+            <path d="M 154,137 C 148,143 144,146 143,144"
+                  stroke="#587aaa" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <!-- Claw 2 -->
+            <path d="M 154,137 C 151,144 149,147 148,146"
+                  stroke="#587aaa" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <!-- Claw 3 — rightmost -->
+            <path d="M 154,137 C 157,143 158,146 157,147"
+                  stroke="#587aaa" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+            <!-- REAR LEG — tucked in flight, less prominent -->
+            <path d="M 252,113 C 250,122 248,129 246,134"
+                  stroke="#587aaa" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.7"/>
+            <path d="M 246,134 C 241,139 238,141 237,139"
+                  stroke="#587aaa" stroke-width="2.2" fill="none" stroke-linecap="round" opacity="0.6"/>
+            <path d="M 246,134 C 244,140 242,143 241,142"
+                  stroke="#587aaa" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.55"/>
+
+          </g><!-- end body group -->
+
+          <!-- ═══ WING GROUP ═══════════════════════════════
+               Shoulder at (240, 82) in viewBox coords.
+               Wing group bounding box must be computed for
+               transform-origin percentage.
+               
+               Wing paths span approximately:
+                 x: 162 to 298   width = 136
+                 y: 10  to 165   height = 155
+               
+               Shoulder (240,82) within bounding box:
+                 x% = (240-162)/136 = 78/136 = 57.4% ≈ 57%
+                 y% = (82-10)/155  = 72/155  = 46.5% ≈ 47%
+               
+               transform-origin: 57% 47%
+          ════════════════════════════════════════════════ -->
+          <g id="dw" fill="#3d608a">
 
             <!-- PRIMARY UPPER WING
-                 Three-finger bat wing. Shoulder at (190,70).
-                 Leading finger sweeps far forward and high.
-                 Membrane curves between finger tips.
+                 Three-finger bat wing. Shoulder at (240,82).
+                 Leading finger: (162, 10) — high and forward
+                 Middle finger:  (205, 18)
+                 Trailing finger:(236, 32)
+                 Membrane dips between fingers.
+                 The whole shape must clearly read as a bat wing.
             -->
             <path d="
-              M 190,70
-              C 172,54 154,38 140,20
-              L 138,18
-              C 152,40 170,57 188,72
-              C 168,48 150,30 148,14
-              C 160,34 168,52 174,68
-              C 165,46 164,30 170,18
-              C 176,38 178,56 178,70
-              Z"/>
+              M 240,82
+              C 222,62 202,38 182,18
+              C 172,8  163,8  162,10
+              C 170,20 180,36 192,54
+              C 194,40 200,24 205,18
+              C 210,34 214,52 214,68
+              C 218,54 226,38 236,32
+              C 238,48 240,66 240,82 Z"/>
 
-            <!-- Rear upper wing finger (trailing) -->
-            <path d="M 190,70
-                     C 196,54 200,38 198,24
-                     C 196,40 193,56 190,70 Z" opacity="0.75"/>
+            <!-- Rear upper finger (trailing edge, behind shoulder) -->
+            <path d="M 240,82
+                     C 248,66 256,48 258,36
+                     C 254,50 248,66 242,82 Z" opacity="0.72"/>
 
-            <!-- Wing membrane fill — the main sail shape -->
-            <path d="M 138,18 C 148,14 168,18 178,68 C 190,56 196,40 198,24 C 195,50 190,68 190,70 L 190,70 Z" opacity="0.5"/>
+            <!-- Wing membrane fill — gives the wing solidity -->
+            <path d="M 162,10 C 172,22 188,44 192,54
+                     L 205,18 L 214,68 L 236,32
+                     L 258,36 L 240,82 Z" opacity="0.22"/>
 
-            <!-- Lower wing membrane — below body, smaller -->
-            <path d="M 190,106 C 178,116 160,126 142,132
-                     C 159,122 176,112 188,104 Z"/>
-            <path d="M 175,110 C 163,120 148,128 133,133
-                     C 148,124 162,116 173,108 Z" opacity="0.72"/>
+            <!-- LOWER WING — below body, smaller secondary membrane -->
+            <path d="M 240,120
+                     C 224,132 206,142 188,148
+                     C 205,138 222,127 238,117 Z"/>
+            <path d="M 218,128
+                     C 200,140 180,150 162,155
+                     C 180,146 199,136 216,125 Z" opacity="0.7"/>
 
-          </g>
+          </g><!-- end wing group -->
 
         </g><!-- end #dragon-all -->
       </svg>
@@ -267,7 +330,7 @@
           <path d="M85,88 C90,77 96,68 99,60"
                 stroke="#1a2a45" stroke-width="8" stroke-linecap="round" fill="none"/>
           <!-- Arrow-like hand hint -->
-          <path d="M97,62 L103,56 M97,62 L101,68"
+          <path d="M95,60 L99,54 M95,60 L99,66"
                 stroke="#1a2a45" stroke-width="4" stroke-linecap="round" fill="none"/>
         </g>
 

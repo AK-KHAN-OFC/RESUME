@@ -99,99 +99,72 @@ nav, main, footer { opacity:0; transition:opacity .95s ease }
 }
 @keyframes lsweep { from{left:-45%} to{left:145%} }
 
-/* ==============================================
-   DRAGON
-   ============================================== */
-
-/* Dragon container — clips overflow so no horizontal scroll */
+/* Dragon container */
 #dragon-wrap {
   position:absolute;
-  top:52%; left:0; right:0; height:200px;
+  top:54%; left:0; right:0; height:200px;
   pointer-events:none;
-  overflow:hidden;           /* FIXED: was overflow:visible, causing h-scroll */
+  overflow:hidden; /* prevents horizontal scroll on mobile */
 }
 
-/* Dragon SVG — starts off right edge, flies to off left edge */
+/* Dragon SVG — positioned via transform, moves via CSS animation */
 #dragon-svg {
   position:absolute; top:0; left:0;
-  width:380px; height:auto;
+  width:440px; height:auto;
   opacity:0;
-  /* Start off-screen right. translateX uses px so it's predictable. */
-  transform:translateX(calc(100vw + 400px));
-  will-change:transform, opacity;
+  transform:translateX(calc(110vw));
 }
-
-/* Fly animation — triggered by JS adding .fly class */
-#dragon-svg.fly {
-  animation:dragonFly 11s cubic-bezier(.25,.1,.25,1) forwards;
-}
+#dragon-svg.fly { animation:dragonFly 10s linear forwards }
 
 @keyframes dragonFly {
-  0%   {
-    transform:translateX(calc(100vw + 400px)) translateY(0px);
-    opacity:0;
-  }
-  6%   { opacity:.48 }
-  /* slight diagonal drift partway through */
-  40%  { transform:translateX(40vw) translateY(-12px); opacity:.5 }
-  70%  { transform:translateX(-10vw) translateY(4px);  opacity:.46 }
-  94%  { opacity:.44 }
-  100% {
-    transform:translateX(calc(-100% - 60px)) translateY(0px);
-    opacity:0;
-  }
+  0%   { transform:translateX(calc(110vw)); opacity:0 }
+  7%   { opacity:.72 }
+  93%  { opacity:.72 }
+  100% { transform:translateX(calc(-80vw - 520px)); opacity:0 }
 }
 
-/* Wing beat — rotates the wing group around shoulder anchor */
+/* Wing beat — rotate around shoulder attachment point */
 #dw {
   transform-box:fill-box;
-  /* Shoulder anchor in the wing SVG group is around x=190,y=70 in viewBox(0 0 320 160)
-     As a percentage: 190/320 ≈ 59%, 70/160 ≈ 44% */
-  transform-origin:59% 44%;
-  animation:wingBeat 1.9s ease-in-out infinite;
+  transform-origin:57% 47%;
+  animation:wingBeat 2.2s ease-in-out infinite;
 }
 @keyframes wingBeat {
   0%   { transform:rotate(0deg) }
-  28%  { transform:rotate(18deg) }   /* downstroke */
-  55%  { transform:rotate(14deg) }   /* bottom pause */
+  32%  { transform:rotate(14deg) }   /* downstroke */
+  58%  { transform:rotate(11deg) }   /* bottom pause */
   100% { transform:rotate(0deg) }    /* upstroke (slower) */
 }
 
 /* Whole-dragon body drift (subtle float) */
-#dragon-all { animation:bodyDrift 3.4s ease-in-out infinite alternate }
+#dragon-all { animation:bodyDrift 3.8s ease-in-out infinite alternate }
 @keyframes bodyDrift {
   from { transform:translateY(0) }
-  to   { transform:translateY(-8px) }
+  to   { transform:translateY(-7px) }
 }
 
-/* ==============================================
-   INTRO TYPING CONTENT
-   ============================================== */
+/* Intro typing content */
 .intro-wrap { max-width:520px; width:100%; position:relative; z-index:1 }
 .intro-id {
   font-size:10px; letter-spacing:4px; text-transform:uppercase;
   color:var(--text-3); margin-bottom:52px;
 }
-.intro-lines { min-height:220px; margin-bottom:56px }
+.intro-lines { min-height:230px; margin-bottom:56px }
 .intro-line {
-  font-size:clamp(15px,3.6vw,21px); font-weight:400;
-  color:var(--text-2); line-height:1.85; margin-bottom:18px;
-  opacity:0; transform:translateY(6px);
+  font-size:clamp(16px,3.8vw,22px); font-weight:400;
+  color:var(--text-2); line-height:1.8; margin-bottom:16px;
+  opacity:0; transform:translateY(8px);
   transition:opacity .5s ease, transform .5s ease;
 }
-.intro-line.vis { opacity:1; transform:none }
+.intro-line.vis { opacity:1; transform:translateY(0) }
 .intro-line .tt { color:var(--text) }
-.intro-line.urdu { color:var(--gold-2); font-style:italic; font-size:clamp(13px,3vw,17px) }
-
-/* Refined cursor — thin, barely blinking */
+.intro-line.urdu { color:var(--gold-2); font-style:italic; font-size:clamp(14px,3.2vw,18px) }
 .cursor {
-  display:inline-block; width:1.5px; height:.9em;
+  display:inline-block; width:2px; height:.95em;
   background:var(--blue); vertical-align:middle;
-  animation:blink 1.1s step-end infinite; margin-left:2px;
-  opacity:.85;
+  animation:blink 1s step-end infinite; margin-left:2px;
 }
-@keyframes blink { 0%,100%{opacity:.85} 50%{opacity:0} }
-
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 .intro-btn {
   display:inline-flex; align-items:center; gap:10px;
   padding:13px 28px;
@@ -223,8 +196,7 @@ nav, main, footer { opacity:0; transition:opacity .95s ease }
 #mascot-wrap {
   position:relative;
   display:flex; flex-direction:column; align-items:center;
-  /* FIXED: reduced from 180px which was too large on mobile */
-  transform:translateX(-120px); opacity:0;
+  transform:translateX(-180px); opacity:0;
   transition:transform .65s cubic-bezier(.2,0,.4,1), opacity .4s ease;
 }
 
@@ -247,8 +219,8 @@ nav, main, footer { opacity:0; transition:opacity .95s ease }
 }
 @keyframes headLook {
   0%,28%,65%,100% { transform:rotate(0deg) }
-  14%             { transform:rotate(-3.5deg) }
-  48%             { transform:rotate(3deg) }
+  14%             { transform:rotate(-3.5deg) }  /* look left */
+  48%             { transform:rotate(3deg) }      /* look right */
 }
 
 /* Eyes */
@@ -408,8 +380,8 @@ nav {
 .hero-name .n2 { display:block; color:transparent; -webkit-text-stroke:1.5px rgba(234,240,253,.65) }
 .hero-formal { font-size:11px; letter-spacing:2px; color:var(--text-3); font-style:italic; margin-bottom:26px }
 .hero-id {
-  display:flex; align-items:center; gap:16px;
-  font-size:11px; letter-spacing:2.5px; text-transform:uppercase;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  font-size:12px; font-weight:400; letter-spacing:3px; text-transform:uppercase;
   color:var(--text-2); margin-bottom:36px;
 }
 .hero-id .sep { width:4px; height:4px; border-radius:50%; background:var(--gold); flex-shrink:0 }
@@ -449,6 +421,44 @@ nav {
 @keyframes sdrop {
   0%,100%{opacity:.3;transform:scaleY(.5);transform-origin:top}
   60%{opacity:1;transform:scaleY(1)}
+}
+
+
+/* ==============================================
+   HERO SEQUENTIAL ENTRANCE
+   Triggered when portfolio becomes visible.
+   Elements start invisible, stagger into view.
+   ============================================== */
+.hero-eye,
+.hero-name .n1,
+.hero-name .n2,
+.hero-formal,
+.hero-id,
+.hero-p,
+.hero-btns {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity .65s var(--ease), transform .65s var(--ease);
+}
+
+/* Stagger via transition-delay — each element delayed a bit more */
+.portfolio-visible .hero-eye    { opacity:1; transform:none; transition-delay:.05s }
+.portfolio-visible .hero-name .n1 { opacity:1; transform:none; transition-delay:.18s }
+.portfolio-visible .hero-name .n2 { opacity:1; transform:none; transition-delay:.28s }
+.portfolio-visible .hero-formal { opacity:1; transform:none; transition-delay:.36s }
+.portfolio-visible .hero-id     { opacity:1; transform:none; transition-delay:.44s }
+.portfolio-visible .hero-p      { opacity:1; transform:none; transition-delay:.54s }
+.portfolio-visible .hero-btns   { opacity:1; transform:none; transition-delay:.66s }
+
+/* For direct-entry (return visitors), skip the entrance */
+.direct-entry .hero-eye,
+.direct-entry .hero-name .n1,
+.direct-entry .hero-name .n2,
+.direct-entry .hero-formal,
+.direct-entry .hero-id,
+.direct-entry .hero-p,
+.direct-entry .hero-btns {
+  opacity:1 !important; transform:none !important; transition:none !important;
 }
 
 /* ==============================================
@@ -563,10 +573,10 @@ nav {
 .sk-track { height:2px; background:var(--bd); border-radius:1px; overflow:hidden }
 .sk-fill {
   height:100%; border-radius:1px;
-  /* FIXED: use width:0 as default, then animate width to data-w value in JS */
-  width:0;
-  transition:width .9s cubic-bezier(.4,0,.2,1);
+  transform-origin:left; transform:scaleX(0);
+  transition:transform .9s cubic-bezier(.4,0,.2,1);
 }
+.sk-card.anim .sk-fill { transform:scaleX(1) }
 .f-gold { background:var(--gold) }
 .f-blue { background:var(--blue) }
 
@@ -706,26 +716,30 @@ footer { border-top:1px solid var(--bd); padding:28px 36px }
   .lang-card:nth-child(even) { padding-left:0; border-left:none }
   .meta-col { grid-template-columns:1fr }
   .foot-in { flex-direction:column; align-items:flex-start; gap:12px }
-  /* Dragon on mobile — smaller, stays fully contained */
-  #dragon-svg  { width:240px }
-  #dragon-wrap { top:58%; height:160px }
-  /* Mascot on mobile */
-  #mascot-svg  { width:108px !important; height:auto }
-  #mascot-wrap { transform:translateX(-80px) } /* FIXED: was -120px */
-  .sbubble     { white-space:normal; min-width:180px; max-width:240px; padding:10px 14px; font-size:12px }
-  .follow-btn  { font-size:11px; padding:10px 24px }
+  /* Dragon on mobile */
+  #dragon-svg   { width:300px }
+  #dragon-wrap  { top:60% }
+  /* Mascot on mobile — slightly larger, more presence */
+  #mascot-svg   { width:108px !important; height:auto }
+  .sbubble      { white-space:normal; min-width:200px; max-width:260px; padding:10px 15px; font-size:12px }
+  .follow-btn   { font-size:11px; padding:10px 24px }
 }
 @media (max-width:520px) {
   .hero-name { letter-spacing:-1px }
   .hero-btns .btn-p { width:100%; justify-content:center }
   .hero-links { gap:20px }
+  .proj-grid { grid-template-columns:1fr }
   .hero-eye { letter-spacing:2px }
   .hero-id  { letter-spacing:1.5px; gap:10px }
   #mascot-svg { width:92px !important }
-  #mascot-wrap { transform:translateX(-60px) } /* FIXED: proportional to screen */
-  .sbubble    { max-width:200px; font-size:12px }
-  /* Dragon even smaller on very narrow screens */
-  #dragon-svg  { width:200px }
+  .sbubble    { max-width:220px; font-size:12px }
+  /* Dragon smaller on narrow screens */
+  #dragon-svg  { width:220px }
+  #dragon-wrap { top:62%; height:160px }
+}
+@media (max-width:380px) {
+  #dragon-svg  { width:180px }
+  #dragon-wrap { height:130px }
 }
 @media (max-width:340px) { .hero-name { font-size:48px } }
 @media (max-height:620px) { .hero-scroll { display:none } }
@@ -762,7 +776,7 @@ footer { border-top:1px solid var(--bd); padding:28px 36px }
   .tl-yr{color:#1a3a8a} .tl-title{color:#111} .tl-sub{color:#444} .tl-desc{color:#666}
   .sk-card { border:1px solid #ddd; background:#f8f8f8 }
   .sk-name{color:#111} .sk-desc{color:#666}
-  .sk-fill { width:100% !important }
+  .sk-fill { transform:scaleX(1) !important }
   .sk-track{background:#eee} .f-gold{background:#b5883a} .f-blue{background:#1a3a8a}
   .lang-card   { border-bottom:1px solid #ddd }
   .langs-grid  { border-top:1px solid #ddd }
