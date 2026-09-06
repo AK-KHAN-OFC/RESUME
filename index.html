@@ -12,9 +12,13 @@
   <link rel="stylesheet" href="style.css">
 
   <!-- Bypass intro for return visitors and prefers-reduced-motion users before first paint -->
+  <!-- Developer tip: append ?intro=1 to the URL to force-show the intro during testing -->
   <script>
   try {
-    if (localStorage.getItem('ak_v2') ||
+    if (location.search.indexOf('intro=1') !== -1) {
+      localStorage.removeItem('ak_v');
+    }
+    if (localStorage.getItem('ak_v') ||
         window.matchMedia('(prefers-reduced-motion:reduce)').matches) {
       document.documentElement.classList.add('direct-entry');
     }
@@ -231,36 +235,28 @@
         <!-- Left arm (always at rest) -->
         <path class="arm-l"
               d="M15,92 C9,103 7,114 10,121"
-              stroke="#2e4a70" stroke-width="8" stroke-linecap="round" fill="none"/>
+              stroke="#1a2a45" stroke-width="8" stroke-linecap="round" fill="none"/>
 
         <!-- Right arm — rest state (hidden during knock / wave) -->
         <path class="arm-r"
               d="M85,92 C91,103 93,114 90,121"
-              stroke="#2e4a70" stroke-width="8" stroke-linecap="round" fill="none"/>
-
-        <!-- Right arm — pre-knock raise (anticipation) -->
-        <g class="arm-raise" aria-hidden="true">
-          <path d="M85,90 C86,80 84,70 79,63"
-                stroke="#2e4a70" stroke-width="8" stroke-linecap="round" fill="none"/>
-          <circle cx="78" cy="62" r="6" fill="#2e4a70" opacity="0.75"/>
-        </g>
+              stroke="#1a2a45" stroke-width="8" stroke-linecap="round" fill="none"/>
 
         <!-- Right arm — knock state (extends toward viewer/screen) -->
         <g class="arm-knock" aria-hidden="true">
           <path d="M85,88 C83,76 79,64 70,55"
-                stroke="#2e4a70" stroke-width="8" stroke-linecap="round" fill="none"/>
+                stroke="#1a2a45" stroke-width="8" stroke-linecap="round" fill="none"/>
           <!-- Fist/hand hint -->
-          <circle cx="69" cy="54" r="7" fill="#2e4a70"/>
+          <circle cx="69" cy="54" r="7" fill="#1a2a45"/>
         </g>
 
         <!-- Right arm — wave/gesture state (points toward portfolio) -->
         <g class="arm-wave" aria-hidden="true">
           <path d="M85,88 C90,77 96,68 99,60"
-                stroke="#2e4a70" stroke-width="8" stroke-linecap="round" fill="none"/>
-          <!-- Hand — open palm hint, fully inside viewBox -->
-          <circle cx="97" cy="62" r="5" fill="#2a3f60" opacity="0.85"/>
-          <path d="M94,57 C94,54 98,54 98,57"
-                stroke="#3a5580" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.7"/>
+                stroke="#1a2a45" stroke-width="8" stroke-linecap="round" fill="none"/>
+          <!-- Arrow-like hand hint -->
+          <path d="M97,62 L103,56 M97,62 L101,68"
+                stroke="#1a2a45" stroke-width="4" stroke-linecap="round" fill="none"/>
         </g>
 
         <!-- Character signature — tiny crystal emblem on cloak -->

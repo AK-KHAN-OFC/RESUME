@@ -103,7 +103,7 @@ nav, main, footer { opacity:0; transition:opacity .95s ease }
 #dragon-wrap {
   position:absolute;
   top:54%; left:0; right:0; height:230px;
-  pointer-events:none; overflow:hidden;
+  pointer-events:none; overflow:visible;
 }
 
 /* Dragon SVG — positioned via transform, moves via CSS animation */
@@ -187,28 +187,26 @@ nav, main, footer { opacity:0; transition:opacity .95s ease }
   display:flex; align-items:center; justify-content:center;
   padding:60px 20px 80px;
   opacity:0; pointer-events:none;
-  transition:opacity .7s ease;
+  transition:opacity .6s ease;
 }
 #mascot-screen.vis { opacity:1; pointer-events:all }
 
 #mascot-wrap {
   position:relative;
   display:flex; flex-direction:column; align-items:center;
-  transform:translateX(-55px) scale(.95); opacity:0;
-  /* cubic-bezier(.34,1.4,.64,1) gives a gentle overshoot/settle feel */
-  transition:transform .85s cubic-bezier(.34,1.4,.64,1), opacity .55s ease;
+  transform:translateX(-180px); opacity:0;
+  transition:transform .65s cubic-bezier(.2,0,.4,1), opacity .4s ease;
 }
 
 /* Mascot SVG */
 #mascot-svg {
   display:block; width:92px; height:auto;
-  animation:mFloat 6s ease-in-out infinite;
+  animation:mSway 5s ease-in-out infinite;
 }
-@keyframes mFloat {
-  0%,100% { transform:translateY(0px) rotate(0deg) }
-  28%     { transform:translateY(-4px) rotate(.8deg) }
-  60%     { transform:translateY(-2px) rotate(-.6deg) }
-  80%     { transform:translateY(-5px) rotate(.4deg) }
+@keyframes mSway {
+  0%,100% { transform:rotate(0deg) translateY(0) }
+  30%     { transform:rotate(1.8deg) translateY(-2px) }
+  70%     { transform:rotate(-1.5deg) translateY(-1.5px) }
 }
 
 /* Head tilt — subtle look animation */
@@ -239,13 +237,9 @@ nav, main, footer { opacity:0; transition:opacity .95s ease }
 }
 
 /* Arm states */
-#mascot-svg .arm-raise { display:none }
 #mascot-svg .arm-knock { display:none }
 #mascot-svg .arm-wave  { display:none }
-#mascot-svg.raising  .arm-r    { display:none }
-#mascot-svg.raising  .arm-raise { display:block }
 #mascot-svg.knocking .arm-r    { display:none }
-#mascot-svg.knocking .arm-raise { display:none }
 #mascot-svg.knocking .arm-knock { display:block }
 #mascot-svg.waving   .arm-r    { display:none }
 #mascot-svg.waving   .arm-wave  { display:block }
@@ -254,14 +248,14 @@ nav, main, footer { opacity:0; transition:opacity .95s ease }
 .sbubble {
   position:absolute;
   bottom:calc(100% + 24px); left:50%;
-  transform:translateX(-50%) scale(.96);
+  transform:translateX(-50%);
   background:var(--bg-r); border:1px solid var(--bd-m);
   border-radius:8px; padding:11px 20px;
   font-size:13px; font-weight:500; color:var(--text);
   white-space:nowrap; pointer-events:none;
-  opacity:0; transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.3,.64,1);
+  opacity:0; transition:opacity .35s ease;
 }
-.sbubble.on { opacity:1; transform:translateX(-50%) scale(1) }
+.sbubble.on { opacity:1 }
 .sbubble::after {
   content:'';
   position:absolute; bottom:-6px; left:50%;
@@ -274,11 +268,10 @@ nav, main, footer { opacity:0; transition:opacity .95s ease }
 
 /* Knock ripple */
 .knock-ripple {
-  /* Positioned to match fist (cx=69,cy=54) in 92px-wide SVG centred in wrap */
-  position:absolute; top:25%; left:calc(50% + 14px);
+  position:absolute; top:28%; right:-22px;
   width:0; height:0; border-radius:50%;
-  border:1.5px solid rgba(61,110,255,.48);
-  animation:kRipple .8s ease-out forwards; pointer-events:none;
+  border:1.5px solid rgba(61,110,255,.52);
+  animation:kRipple .75s ease-out forwards; pointer-events:none;
 }
 @keyframes kRipple {
   from { width:0; height:0; margin:0; opacity:1 }
@@ -649,44 +642,6 @@ footer { border-top:1px solid var(--bd); padding:28px 36px }
 }
 .print-btn:hover { border-color:var(--text-2); color:var(--text-2) }
 .foot-yr { font-size:11px; color:var(--text-3) }
-
-
-/* ==============================================
-   HERO SEQUENTIAL ENTRANCE
-   Triggered when .portfolio-visible added to html.
-   Works for first-visit only; direct-entry skips.
-   ============================================== */
-.hero-eye,
-.hero-name .n1,
-.hero-name .n2,
-.hero-formal,
-.hero-id,
-.hero-p,
-.hero-btns {
-  opacity:0;
-  transform:translateY(14px);
-  transition:opacity .6s var(--ease), transform .6s var(--ease);
-}
-.portfolio-visible .hero-eye     { opacity:1; transform:none; transition-delay:.08s }
-.portfolio-visible .hero-name .n1{ opacity:1; transform:none; transition-delay:.2s  }
-.portfolio-visible .hero-name .n2{ opacity:1; transform:none; transition-delay:.3s  }
-.portfolio-visible .hero-formal  { opacity:1; transform:none; transition-delay:.38s }
-.portfolio-visible .hero-id      { opacity:1; transform:none; transition-delay:.46s }
-.portfolio-visible .hero-p       { opacity:1; transform:none; transition-delay:.56s }
-.portfolio-visible .hero-btns    { opacity:1; transform:none; transition-delay:.68s }
-
-/* Return visitors: no entrance animation */
-.direct-entry .hero-eye,
-.direct-entry .hero-name .n1,
-.direct-entry .hero-name .n2,
-.direct-entry .hero-formal,
-.direct-entry .hero-id,
-.direct-entry .hero-p,
-.direct-entry .hero-btns {
-  opacity:1 !important;
-  transform:none !important;
-  transition:none !important;
-}
 
 /* ==============================================
    SCROLL REVEAL

@@ -179,19 +179,16 @@
 
     var mascotScreen = document.getElementById('mascot-screen');
 
-    /* Crossfade: intro fades, mascot fades in simultaneously */
+    /* Crossfade: intro out, mascot in */
     introEl.style.opacity      = '0';
     introEl.style.pointerEvents = 'none';
     if (mascotScreen) mascotScreen.classList.add('vis');
 
-    /* Start mascot sequence immediately — no blank screen gap */
-    if (mascotScreen) runMascotSequence();
-
-    /* Cleanup intro after its opacity transition completes */
     setTimeout(function () {
       introEl.style.display = 'none';
       stopParticles();
-    }, 750);
+      if (mascotScreen) runMascotSequence();
+    }, 860);
   }
 
   /* ──────────────────────────────────────────────────────
@@ -205,72 +202,54 @@
 
     if (!wrap) { revealPortfolio(); return; }
 
-    /* 1. Slide mascot in — double rAF ensures transition fires from initial state */
-    requestAnimationFrame(function () {
-      requestAnimationFrame(function () {
-        wrap.style.transition = 'transform .85s cubic-bezier(.34,1.4,.64,1), opacity .55s ease';
-        wrap.style.transform  = 'translateX(0) scale(1)';
-        wrap.style.opacity    = '1';
-      });
-    });
-
-    /* 2a. Arm raise — anticipation before knock (T=900ms, 235ms after slide ends ~665ms) */
+    /* 1. Slide mascot in from the left */
     setTimeout(function () {
-      if (mascotSvg) mascotSvg.classList.add('raising');
-    }, 900);
+      wrap.style.transition = 'transform .65s cubic-bezier(.2,0,.4,1), opacity .4s ease';
+      wrap.style.transform  = 'translateX(0)';
+      wrap.style.opacity    = '1';
+    }, 200);
 
-    /* 2b. Knock — arm snaps to knock position (T=1150ms) */
+    /* 2. Knock animation — arm extends toward screen */
     setTimeout(function () {
-      if (mascotSvg) {
-        mascotSvg.classList.remove('raising');
-        mascotSvg.classList.add('knocking');
-      }
+      if (mascotSvg) mascotSvg.classList.add('knocking');
       spawnRipple(wrap);
-      /* Second knock 300ms later — feels like knock-knock rhythm */
-      setTimeout(function () {
-        spawnRipple(wrap);
-      }, 300);
-    }, 1150);
+      setTimeout(function () { spawnRipple(wrap); }, 220);
+    }, 1000);
 
-    /* 3. Arm returns to rest after both knocks land */
+    /* 3. Arm returns to rest */
     setTimeout(function () {
       if (mascotSvg) mascotSvg.classList.remove('knocking');
-    }, 1700);
+    }, 1600);
 
-    /* 4. Speech bubble 1 — brief pause after settling */
+    /* 4. Speech bubble 1: acknowledgment */
     setTimeout(function () {
       showSpeech(speechEl, 'Oh, you made it.');
-    }, 2000);
+    }, 1900);
 
-    /* 5. Speech bubble 2 — hide first, gap, then second appears */
+    /* 5. Speech bubble 2: invitation */
     setTimeout(function () {
       hideSpeech(speechEl);
-    }, 3600);
-    setTimeout(function () {
-      showSpeech(speechEl, "Come on. I'll show you around.");
-    }, 3980);
+      setTimeout(function () {
+        showSpeech(speechEl, "Come on. I'll show you around.");
+      }, 360);
+    }, 3500);
 
-    /* 6. Wave gesture — fires AFTER speech 2 is readable (470ms later) */
+    /* 6. Wave gesture — mascot gestures toward the portfolio */
     setTimeout(function () {
       if (mascotSvg) mascotSvg.classList.add('waving');
-    }, 4450);
+    }, 3750);
 
-    /* 7. Follow Me — appears after wave settles (350ms after wave) */
+    /* 7. Follow Me button appears */
     setTimeout(function () {
       if (followBtn) followBtn.classList.add('on');
-    }, 4800);
+    }, 4000);
 
     /* Follow Me click handler */
     if (followBtn) {
       followBtn.addEventListener('click', function onFollow() {
         followBtn.removeEventListener('click', onFollow);
         followBtn.disabled = true;
-        /* Brief pause — character reacts before walking off */
-        followBtn.style.opacity = '0';
-        hideSpeech(speechEl);
-        setTimeout(function () {
-          walkOffAndReveal(mascotSvg, speechEl, wrap);
-        }, 180);
+        walkOffAndReveal(mascotSvg, speechEl, wrap);
       });
     }
   }
@@ -296,30 +275,31 @@
   function walkOffAndReveal(mascotSvg, speechEl, wrap) {
     var mScreen = document.getElementById('mascot-screen');
 
-    /* Remove arm states — return to idle before walking */
-    if (mascotSvg) mascotSvg.classList.remove('raising', 'knocking', 'waving');
+    /* Clear all states */
+    if (mascotSvg) mascotSvg.classList.remove('knocking', 'waving');
     hideSpeech(speechEl);
 
-    /* Mascot accelerates off to the right — leading the user into the portfolio */
+    /* Mascot walks off to the right */
     if (wrap) {
-      wrap.style.transition = 'transform .9s cubic-bezier(.4,0,.8,.6), opacity .6s .25s ease';
-      wrap.style.transform  = 'translateX(120vw) scale(.9)';
+      wrap.style.transition = 'transform .75s cubic-bezier(.55,0,1,.7), opacity .5s .2s ease';
+      void wrap.offsetWidth; /* flush layout so browser sees "before" state, transition fires */
+      wrap.style.transform  = 'translateX(130vw)';
       wrap.style.opacity    = '0';
     }
 
-    /* Portfolio begins appearing slightly before mascot fully exits */
+    /* Mascot screen fades out, portfolio fades in */
     setTimeout(function () {
       if (mScreen) {
-        mScreen.style.transition = 'opacity .75s ease';
+        mScreen.style.transition = 'opacity .7s ease';
         mScreen.style.opacity    = '0';
         mScreen.style.pointerEvents = 'none';
       }
       revealPortfolio();
-    }, 350);
+    }, 380);
 
     setTimeout(function () {
       if (mScreen) mScreen.style.display = 'none';
-    }, 1400);
+    }, 1300);
   }
 
   /* ──────────────────────────────────────────────────────
@@ -330,7 +310,7 @@
   function revealPortfolio() {
     if (portfolioRevealed) return;
     portfolioRevealed = true;
-    try { localStorage.setItem('ak_v2', '1'); } catch (e) {}
+    try { localStorage.setItem('ak_v', '1'); } catch (e) {}
     var skipBtn = document.getElementById('skip-all');
     if (skipBtn) skipBtn.style.display = 'none';
     document.documentElement.classList.add('portfolio-visible');
@@ -345,14 +325,10 @@
     skipAllBtn.addEventListener('click', function () {
       var intro  = document.getElementById('intro');
       var mascot = document.getElementById('mascot-screen');
-      if (intro)  { intro.style.opacity = '0'; intro.style.pointerEvents = 'none'; }
-      if (mascot) { mascot.style.opacity = '0'; mascot.style.pointerEvents = 'none'; }
+      if (intro)  intro.style.display  = 'none';
+      if (mascot) mascot.style.display = 'none';
       stopParticles();
-      setTimeout(function () {
-        if (intro)  intro.style.display  = 'none';
-        if (mascot) mascot.style.display = 'none';
-        revealPortfolio();
-      }, 250);
+      revealPortfolio();
     });
   }
 
