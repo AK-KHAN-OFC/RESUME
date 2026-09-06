@@ -179,16 +179,17 @@
 
     var mascotScreen = document.getElementById('mascot-screen');
 
-    /* Crossfade: intro out, mascot in */
-    introEl.style.opacity      = '0';
+    /* Crossfade: intro fades, mascot screen fades in simultaneously */
+    introEl.style.opacity       = '0';
     introEl.style.pointerEvents = 'none';
     if (mascotScreen) mascotScreen.classList.add('vis');
-
+    /* Start mascot immediately — character enters as intro fades */
+    if (mascotScreen) runMascotSequence();
+    /* Cleanup intro DOM after its fade completes */
     setTimeout(function () {
       introEl.style.display = 'none';
       stopParticles();
-      if (mascotScreen) runMascotSequence();
-    }, 860);
+    }, 750);
   }
 
   /* ──────────────────────────────────────────────────────
@@ -202,54 +203,118 @@
 
     if (!wrap) { revealPortfolio(); return; }
 
-    /* 1. Slide mascot in from the left */
-    setTimeout(function () {
-      wrap.style.transition = 'transform .65s cubic-bezier(.2,0,.4,1), opacity .4s ease';
-      wrap.style.transform  = 'translateX(0)';
-      wrap.style.opacity    = '1';
-    }, 200);
+    /* ── 1. CHARACTER ENTRANCE ─────────────────────────────────
+       Double rAF: first frame = element rendered at initial state,
+       second frame = transition fires from that state.
+       Character rises from slightly below, fades in, settles.
+       CSS cubic-bezier(.22,1.1,.36,1) gives a gentle overshoot/land. */
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        wrap.style.transition = 'transform .9s cubic-bezier(.22,1.1,.36,1), opacity .6s ease';
+        wrap.style.transform  = 'translateY(0) scale(1)';
+        wrap.style.opacity    = '1';
+      });
+    });
 
-    /* 2. Knock animation — arm extends toward screen */
+    /* ── 2. KNOCK SEQUENCE ─────────────────────────────────────
+       Timeline (relative to T=0 = Explore click):
+       
+       T=880ms:  Arm appears — CSS @keyframes armKnock starts
+       T=880+338ms = T=1218ms: Impact 1 (25% of 1350ms keyframe)
+                  → ripple 1 fires here to match visual impact
+       T=880+972ms = T=1852ms: Impact 2 (72% of 1350ms keyframe)
+                  → ripple 2 fires here
+       T=880+1350ms = T=2230ms: Arm keyframe ends, returns to rest
+       T=2380ms:  Knock-done class → body returns to float animation
+    
+       The CSS armKnock keyframe handles all arm motion.
+       JS only needs to add/remove the .knocking class and
+       fire the ripples at the correct impact moments.
+    */
+    var KNOCK_START   = 880;   /* ms from T=0 */
+    var IMPACT_1      = 338;   /* ms into armKnock (25% of 1350ms) */
+    var IMPACT_2      = 972;   /* ms into armKnock (72% of 1350ms) */
+    var KNOCK_DURATION = 1350; /* matches CSS armKnock duration */
+
     setTimeout(function () {
       if (mascotSvg) mascotSvg.classList.add('knocking');
-      spawnRipple(wrap);
-      setTimeout(function () { spawnRipple(wrap); }, 220);
-    }, 1000);
+    }, KNOCK_START);
 
-    /* 3. Arm returns to rest */
+    /* Ripple 1 — fires at moment of first impact */
     setTimeout(function () {
-      if (mascotSvg) mascotSvg.classList.remove('knocking');
-    }, 1600);
+      spawnRipple(wrap);
+    }, KNOCK_START + IMPACT_1);
 
-    /* 4. Speech bubble 1: acknowledgment */
+    /* Ripple 2 — fires at moment of second impact */
+    setTimeout(function () {
+      spawnRipple(wrap);
+    }, KNOCK_START + IMPACT_2);
+
+    /* Remove knocking class after keyframe ends + brief buffer */
+    setTimeout(function () {
+      if (mascotSvg) {
+        mascotSvg.classList.remove('knocking');
+        mascotSvg.classList.add('knock-done');
+        /* Clean up knock-done class after float resumes */
+        setTimeout(function () {
+          if (mascotSvg) mascotSvg.classList.remove('knock-done');
+        }, 200);
+      }
+    }, KNOCK_START + KNOCK_DURATION + 80);
+
+    /* ── 3. REACTION PAUSE ─────────────────────────────────────
+       Character is still after knock. No dialogue yet.
+       This gives the viewer a beat to understand what happened.
+       Then: a tiny head look toward viewer (handled by headLook CSS)
+       before speaking. */
+
+    /* ── 4. SPEECH BUBBLE 1 ────────────────────────────────────
+       Appears ~400ms after knock ends.
+       Character has settled, now acknowledges the visitor. */
+    var SPEECH1_TIME = KNOCK_START + KNOCK_DURATION + 480;  /* ~2310ms */
     setTimeout(function () {
       showSpeech(speechEl, 'Oh, you made it.');
-    }, 1900);
+    }, SPEECH1_TIME);
 
-    /* 5. Speech bubble 2: invitation */
+    /* ── 5. SPEECH BUBBLE 2 ────────────────────────────────────
+       First bubble stays for ~1600ms, then a 380ms gap,
+       then second bubble appears. */
+    var SPEECH2_TIME = SPEECH1_TIME + 1600 + 380;           /* ~4290ms */
     setTimeout(function () {
       hideSpeech(speechEl);
-      setTimeout(function () {
-        showSpeech(speechEl, "Come on. I'll show you around.");
-      }, 360);
-    }, 3500);
+    }, SPEECH1_TIME + 1600);
+    setTimeout(function () {
+      showSpeech(speechEl, "Come on. I'll show you around.");
+    }, SPEECH2_TIME);
 
-    /* 6. Wave gesture — mascot gestures toward the portfolio */
+    /* ── 6. WAVE GESTURE ───────────────────────────────────────
+       Fires AFTER speech 2 has been readable for ~500ms.
+       Speech leads the gesture — character says it, then shows it. */
+    var WAVE_TIME = SPEECH2_TIME + 500;                      /* ~4790ms */
     setTimeout(function () {
       if (mascotSvg) mascotSvg.classList.add('waving');
-    }, 3750);
+    }, WAVE_TIME);
 
-    /* 7. Follow Me button appears */
+    /* ── 7. FOLLOW ME ──────────────────────────────────────────
+       Appears 380ms after wave starts — arm is visibly raised
+       before the button appears. */
     setTimeout(function () {
       if (followBtn) followBtn.classList.add('on');
-    }, 4000);
+    }, WAVE_TIME + 380);
 
-    /* Follow Me click handler */
+    /* ── FOLLOW ME CLICK HANDLER ───────────────────────────────
+       Self-removes after one use.
+       Brief 160ms gap before exit so character visually reacts. */
     if (followBtn) {
       followBtn.addEventListener('click', function onFollow() {
         followBtn.removeEventListener('click', onFollow);
         followBtn.disabled = true;
-        walkOffAndReveal(mascotSvg, speechEl, wrap);
+        hideSpeech(speechEl);
+        followBtn.style.transition = 'opacity .2s ease';
+        followBtn.style.opacity    = '0';
+        setTimeout(function () {
+          walkOffAndReveal(mascotSvg, speechEl, wrap);
+        }, 200);
       });
     }
   }
@@ -275,31 +340,33 @@
   function walkOffAndReveal(mascotSvg, speechEl, wrap) {
     var mScreen = document.getElementById('mascot-screen');
 
-    /* Clear all states */
-    if (mascotSvg) mascotSvg.classList.remove('knocking', 'waving');
+    /* Remove any lingering arm/speech states */
+    if (mascotSvg) mascotSvg.classList.remove('knocking', 'knock-done', 'waving');
     hideSpeech(speechEl);
 
-    /* Mascot walks off to the right */
+    /* Character accelerates toward the portfolio (right side).
+       Slight scale down as it moves away — depth cue.
+       Opacity delay .15s so it's visible for a moment before fading. */
     if (wrap) {
-      wrap.style.transition = 'transform .75s cubic-bezier(.55,0,1,.7), opacity .5s .2s ease';
-      void wrap.offsetWidth; /* flush layout so browser sees "before" state, transition fires */
-      wrap.style.transform  = 'translateX(130vw)';
+      wrap.style.transition = 'transform .95s cubic-bezier(.4,0,.85,.6), opacity .65s .15s ease';
+      wrap.style.transform  = 'translateX(115vw) scale(.85)';
       wrap.style.opacity    = '0';
     }
 
-    /* Mascot screen fades out, portfolio fades in */
+    /* Portfolio begins appearing while character is still mid-exit.
+       This creates the feeling of following the character into the portfolio. */
     setTimeout(function () {
       if (mScreen) {
-        mScreen.style.transition = 'opacity .7s ease';
+        mScreen.style.transition = 'opacity .8s ease';
         mScreen.style.opacity    = '0';
         mScreen.style.pointerEvents = 'none';
       }
       revealPortfolio();
-    }, 380);
+    }, 320);
 
     setTimeout(function () {
       if (mScreen) mScreen.style.display = 'none';
-    }, 1300);
+    }, 1400);
   }
 
   /* ──────────────────────────────────────────────────────
@@ -310,7 +377,7 @@
   function revealPortfolio() {
     if (portfolioRevealed) return;
     portfolioRevealed = true;
-    try { localStorage.setItem('ak_v', '1'); } catch (e) {}
+    try { localStorage.setItem('ak_v2', '1'); } catch (e) {}
     var skipBtn = document.getElementById('skip-all');
     if (skipBtn) skipBtn.style.display = 'none';
     document.documentElement.classList.add('portfolio-visible');
@@ -325,10 +392,15 @@
     skipAllBtn.addEventListener('click', function () {
       var intro  = document.getElementById('intro');
       var mascot = document.getElementById('mascot-screen');
-      if (intro)  intro.style.display  = 'none';
-      if (mascot) mascot.style.display = 'none';
+      /* Fade before hiding — avoids jarring instant cut */
+      if (intro)  { intro.style.opacity  = '0'; intro.style.pointerEvents  = 'none'; }
+      if (mascot) { mascot.style.opacity = '0'; mascot.style.pointerEvents = 'none'; }
       stopParticles();
-      revealPortfolio();
+      setTimeout(function () {
+        if (intro)  intro.style.display  = 'none';
+        if (mascot) mascot.style.display = 'none';
+        revealPortfolio();
+      }, 300);
     });
   }
 

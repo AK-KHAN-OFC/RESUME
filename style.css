@@ -103,7 +103,7 @@ nav, main, footer { opacity:0; transition:opacity .95s ease }
 #dragon-wrap {
   position:absolute;
   top:54%; left:0; right:0; height:230px;
-  pointer-events:none; overflow:visible;
+  pointer-events:none; overflow:hidden;
 }
 
 /* Dragon SVG — positioned via transform, moves via CSS animation */
@@ -194,19 +194,39 @@ nav, main, footer { opacity:0; transition:opacity .95s ease }
 #mascot-wrap {
   position:relative;
   display:flex; flex-direction:column; align-items:center;
-  transform:translateX(-180px); opacity:0;
-  transition:transform .65s cubic-bezier(.2,0,.4,1), opacity .4s ease;
+  /* Start: slightly below center, scaled down, invisible.
+     This reads as the character materializing from the darkness
+     rather than sliding in from the side. */
+  transform:translateY(18px) scale(.94); opacity:0;
+  /* Settle easing: slight overshoot gives a natural landing */
+  transition:transform .9s cubic-bezier(.22,1.1,.36,1), opacity .6s ease;
 }
 
 /* Mascot SVG */
 #mascot-svg {
   display:block; width:92px; height:auto;
-  animation:mSway 5s ease-in-out infinite;
+  /* Float: gentle Y oscillation. Period deliberately prime-ish
+     so it doesn't feel like a CSS loop. */
+  animation:mFloat 5.3s ease-in-out infinite;
 }
-@keyframes mSway {
-  0%,100% { transform:rotate(0deg) translateY(0) }
-  30%     { transform:rotate(1.8deg) translateY(-2px) }
-  70%     { transform:rotate(-1.5deg) translateY(-1.5px) }
+@keyframes mFloat {
+  0%   { transform:translateY(0px) rotate(0deg) }
+  35%  { transform:translateY(-4px) rotate(.5deg) }
+  65%  { transform:translateY(-2.5px) rotate(-.4deg) }
+  100% { transform:translateY(0px) rotate(0deg) }
+}
+
+/* Knock body lean — tiny forward lean during knock to add weight */
+#mascot-svg.knocking {
+  animation:mKnockLean 0.12s ease-out forwards;
+}
+@keyframes mKnockLean {
+  0%   { transform:translateY(0px) rotate(0deg) }
+  100% { transform:translateY(1px) rotate(1.5deg) }
+}
+/* After knocking, return to float */
+#mascot-svg.knock-done {
+  animation:mFloat 5.3s ease-in-out infinite;
 }
 
 /* Head tilt — subtle look animation */
@@ -236,26 +256,90 @@ nav, main, footer { opacity:0; transition:opacity .95s ease }
   50%     { opacity:.58 }
 }
 
-/* Arm states */
-#mascot-svg .arm-knock { display:none }
-#mascot-svg .arm-wave  { display:none }
-#mascot-svg.knocking .arm-r    { display:none }
-#mascot-svg.knocking .arm-knock { display:block }
-#mascot-svg.waving   .arm-r    { display:none }
-#mascot-svg.waving   .arm-wave  { display:block }
+/* ── ARM BASE STATES ──────────────────────────────
+   Use opacity/pointer-events instead of display:none
+   so CSS transitions and keyframes can operate on arms. */
+#mascot-svg .arm-knock { opacity:0; pointer-events:none }
+#mascot-svg .arm-wave  { opacity:0; pointer-events:none }
+
+/* REST → hide arm-r when knock/wave active */
+#mascot-svg.knocking .arm-r    { opacity:0; pointer-events:none }
+#mascot-svg.waving   .arm-r    { opacity:0; pointer-events:none }
+
+/* ── KNOCK ARM ANIMATION ──────────────────────────
+   When .knocking is added:
+   1. arm-knock becomes visible
+   2. armKnock keyframe animates the GROUP through
+      reach → impact → recoil (×2) with natural rhythm.
+   
+   The group starts at its SVG position.
+   translateX/Y offsets simulate the arm motion:
+     Reach forward:  translateX(-6px) translateY(-4px)
+     Impact/contact: translateX(-9px) translateY(-6px)  ← closest to door
+     Recoil:         translateX(-2px) translateY(-1px)  ← pulled back
+   
+   Two knocks with a deliberate pause between them.
+   Knock 2 is slightly shorter — softer second knock feel.
+*/
+#mascot-svg.knocking .arm-knock {
+  opacity:1;
+  animation:armKnock 1.35s cubic-bezier(.25,.46,.45,.94) forwards;
+}
+
+@keyframes armKnock {
+  /* ── Pre-knock: arm rises to reach position ── */
+  0%   { transform:translate(0px, 0px) }
+  /* ── Knock 1: reach toward door ── */
+  18%  { transform:translate(-7px, -5px) }
+  /* ── Knock 1: impact (brief — just a frame) ── */
+  25%  { transform:translate(-10px, -7px) }
+  /* ── Knock 1: recoil ── */
+  36%  { transform:translate(-2px, -1px) }
+  /* ── Pause — character holds position ── */
+  52%  { transform:translate(-2px, -1px) }
+  /* ── Knock 2: reach (slightly less extension) ── */
+  66%  { transform:translate(-6px, -4px) }
+  /* ── Knock 2: impact ── */
+  72%  { transform:translate(-8px, -6px) }
+  /* ── Knock 2: recoil + settle ── */
+  82%  { transform:translate(-1px, 0px) }
+  /* ── Return to natural rest ── */
+  100% { transform:translate(0px, 0px) }
+}
+
+/* ── WAVE ARM ────────────────────────────────────
+   Smooth fade in + subtle beckoning animation.
+   The arm stays visible until waving class is removed. */
+#mascot-svg.waving .arm-wave {
+  opacity:1;
+  animation:armWave 2.4s ease-in-out infinite;
+}
+@keyframes armWave {
+  0%,100% { transform:translate(0px, 0px) }
+  /* ── Beckon: pull slightly inward ── */
+  30%     { transform:translate(-3px, 2px) }
+  /* ── Hold extended ── */
+  60%     { transform:translate(0px, 0px) }
+  /* ── Slight emphasis ── */
+  80%     { transform:translate(-2px, 1px) }
+}
 
 /* Speech bubble */
 .sbubble {
   position:absolute;
   bottom:calc(100% + 24px); left:50%;
-  transform:translateX(-50%);
+  transform:translateX(-50%) scale(.92) translateY(4px);
   background:var(--bg-r); border:1px solid var(--bd-m);
   border-radius:8px; padding:11px 20px;
   font-size:13px; font-weight:500; color:var(--text);
   white-space:nowrap; pointer-events:none;
-  opacity:0; transition:opacity .35s ease;
+  opacity:0;
+  transition:opacity .38s ease, transform .38s cubic-bezier(.22,1.1,.36,1);
 }
-.sbubble.on { opacity:1 }
+.sbubble.on {
+  opacity:1;
+  transform:translateX(-50%) scale(1) translateY(0px);
+}
 .sbubble::after {
   content:'';
   position:absolute; bottom:-6px; left:50%;
@@ -268,14 +352,19 @@ nav, main, footer { opacity:0; transition:opacity .95s ease }
 
 /* Knock ripple */
 .knock-ripple {
-  position:absolute; top:28%; right:-22px;
+  /* Position aligned with fist: cx=60/100 of 92px wide SVG = 55px from SVG left.
+     SVG is 92px, centered in wrap. left: calc(50% - 46px + 55px) = calc(50% + 9px)
+     top: roughly 46/140 of SVG height (~33%) from wrap top. */
+  position:absolute;
+  top:27%;
+  left:calc(50% - 14px);
   width:0; height:0; border-radius:50%;
-  border:1.5px solid rgba(61,110,255,.52);
-  animation:kRipple .75s ease-out forwards; pointer-events:none;
+  border:1.5px solid rgba(61,110,255,.45);
+  animation:kRipple .85s ease-out forwards; pointer-events:none;
 }
 @keyframes kRipple {
-  from { width:0; height:0; margin:0; opacity:1 }
-  to   { width:58px; height:58px; margin:-29px; opacity:0 }
+  from { width:0; height:0; margin:0; opacity:.9 }
+  to   { width:52px; height:52px; margin:-26px; opacity:0 }
 }
 
 /* Follow Me button */
@@ -643,6 +732,40 @@ footer { border-top:1px solid var(--bd); padding:28px 36px }
 .print-btn:hover { border-color:var(--text-2); color:var(--text-2) }
 .foot-yr { font-size:11px; color:var(--text-3) }
 
+
+/* ==============================================
+   HERO FIRST-VISIT ENTRANCE
+   Elements start hidden, stagger in when
+   .portfolio-visible is added to <html>.
+   Return visitors get instant via .direct-entry.
+   ============================================== */
+.hero-eye,
+.hero-name .n1,
+.hero-name .n2,
+.hero-formal,
+.hero-id,
+.hero-p,
+.hero-btns {
+  opacity:0;
+  transform:translateY(12px);
+  transition:opacity .65s var(--ease), transform .65s var(--ease);
+}
+.portfolio-visible .hero-eye      { opacity:1; transform:none; transition-delay:.06s }
+.portfolio-visible .hero-name .n1 { opacity:1; transform:none; transition-delay:.18s }
+.portfolio-visible .hero-name .n2 { opacity:1; transform:none; transition-delay:.27s }
+.portfolio-visible .hero-formal   { opacity:1; transform:none; transition-delay:.35s }
+.portfolio-visible .hero-id       { opacity:1; transform:none; transition-delay:.43s }
+.portfolio-visible .hero-p        { opacity:1; transform:none; transition-delay:.53s }
+.portfolio-visible .hero-btns     { opacity:1; transform:none; transition-delay:.65s }
+.direct-entry .hero-eye,
+.direct-entry .hero-name .n1,
+.direct-entry .hero-name .n2,
+.direct-entry .hero-formal,
+.direct-entry .hero-id,
+.direct-entry .hero-p,
+.direct-entry .hero-btns {
+  opacity:1 !important; transform:none !important; transition:none !important;
+}
 /* ==============================================
    SCROLL REVEAL
    ============================================== */

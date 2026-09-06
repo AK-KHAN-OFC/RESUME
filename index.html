@@ -12,13 +12,9 @@
   <link rel="stylesheet" href="style.css">
 
   <!-- Bypass intro for return visitors and prefers-reduced-motion users before first paint -->
-  <!-- Developer tip: append ?intro=1 to the URL to force-show the intro during testing -->
   <script>
   try {
-    if (location.search.indexOf('intro=1') !== -1) {
-      localStorage.removeItem('ak_v');
-    }
-    if (localStorage.getItem('ak_v') ||
+    if (localStorage.getItem('ak_v2') ||
         window.matchMedia('(prefers-reduced-motion:reduce)').matches) {
       document.documentElement.classList.add('direct-entry');
     }
@@ -232,31 +228,56 @@
           </g>
         </g>
 
-        <!-- Left arm (always at rest) -->
+        <!-- Left arm — always at rest, gentle hang -->
         <path class="arm-l"
               d="M15,92 C9,103 7,114 10,121"
-              stroke="#1a2a45" stroke-width="8" stroke-linecap="round" fill="none"/>
+              stroke="#253d5c" stroke-width="8" stroke-linecap="round" fill="none"/>
 
-        <!-- Right arm — rest state (hidden during knock / wave) -->
+        <!-- Right arm — rest state -->
         <path class="arm-r"
               d="M85,92 C91,103 93,114 90,121"
-              stroke="#1a2a45" stroke-width="8" stroke-linecap="round" fill="none"/>
+              stroke="#253d5c" stroke-width="8" stroke-linecap="round" fill="none"/>
 
-        <!-- Right arm — knock state (extends toward viewer/screen) -->
+        <!-- Right arm — KNOCK STATE
+             This group is animated via CSS @keyframes armKnock.
+             The keyframe moves through reach → impact → recoil × 2.
+             The fist at contact position: upper-left, representing
+             the invisible door surface in front of the character.
+             At rest/extended: fist at ~(60,46)
+             At contact/impact: fist at ~(55,42) — slightly closer
+             At recoil: fist at ~(65,50) — pulled back
+        -->
         <g class="arm-knock" aria-hidden="true">
-          <path d="M85,88 C83,76 79,64 70,55"
-                stroke="#1a2a45" stroke-width="8" stroke-linecap="round" fill="none"/>
-          <!-- Fist/hand hint -->
-          <circle cx="69" cy="54" r="7" fill="#1a2a45"/>
+          <!-- Arm path: shoulder (85,88) → fist area (upper-left) -->
+          <!-- The CSS keyframe translates this group to simulate motion -->
+          <path class="arm-knock-path"
+                d="M85,90 C80,76 72,60 62,48"
+                stroke="#253d5c" stroke-width="8" stroke-linecap="round" fill="none"/>
+          <!-- Fist — slightly larger and more visible than before -->
+          <circle class="arm-knock-fist" cx="60" cy="46" r="7.5" fill="#253d5c"/>
+          <!-- Tiny knuckle detail — reads as a fist at any size -->
+          <circle cx="56" cy="43" r="2.5" fill="#1a2d4a"/>
+          <circle cx="62" cy="42" r="2"   fill="#1a2d4a"/>
         </g>
 
-        <!-- Right arm — wave/gesture state (points toward portfolio) -->
+        <!-- Right arm — WAVE / "COME WITH ME" GESTURE
+             Arm sweeps up-right, hand held open toward the portfolio.
+             All coords within viewBox (0 0 100 140).
+             Hand at (91,52) — upper right, clearly within bounds.
+        -->
         <g class="arm-wave" aria-hidden="true">
-          <path d="M85,88 C90,77 96,68 99,60"
-                stroke="#1a2a45" stroke-width="8" stroke-linecap="round" fill="none"/>
-          <!-- Arrow-like hand hint -->
-          <path d="M97,62 L103,56 M97,62 L101,68"
-                stroke="#1a2a45" stroke-width="4" stroke-linecap="round" fill="none"/>
+          <!-- Arm path: shoulder to raised hand position -->
+          <path d="M84,88 C86,76 88,64 91,54"
+                stroke="#253d5c" stroke-width="8" stroke-linecap="round" fill="none"/>
+          <!-- Open hand / palm — readable as beckoning gesture -->
+          <circle cx="91" cy="52" r="7" fill="#253d5c"/>
+          <!-- Finger suggestion — three short lines from palm -->
+          <path d="M87,46 C86,42 86,38 87,36"
+                stroke="#2e4a70" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          <path d="M91,45 C91,41 91,37 91,35"
+                stroke="#2e4a70" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          <path d="M95,47 C96,43 97,39 96,37"
+                stroke="#2e4a70" stroke-width="2.5" stroke-linecap="round" fill="none"/>
         </g>
 
         <!-- Character signature — tiny crystal emblem on cloak -->
@@ -396,7 +417,7 @@
             </div>
             <div class="mc" data-d="180">
               <p class="mc-label">Degree</p>
-              <p class="mc-val">B.Com — 1st Year</p>
+              <p class="mc-val">B.Com — 2nd Year</p>
               <p class="mc-sub">BAMU (Dr. Babasaheb Ambedkar College)</p>
             </div>
             <div class="mc" data-d="270">
@@ -437,9 +458,9 @@
             <p class="tl-yr">2024 — Present</p>
             <h3 class="tl-title">B.Com (Bachelor of Commerce)</h3>
             <p class="tl-sub">Dr. Babasaheb Ambedkar College, BAMU</p>
-            <p class="tl-desc">Currently in 1st Year. Building foundational knowledge across
+            <p class="tl-desc">Currently in 2nd Year. Building foundational knowledge across
             commerce, financial accounting and business studies.</p>
-            <span class="tl-badge b-curr">Ongoing &middot; 1st Year</span>
+            <span class="tl-badge b-curr">Ongoing &middot; 2nd Year</span>
           </div>
           <div class="tl-item inprog" role="listitem">
             <div class="tl-dot" aria-hidden="true"></div>
@@ -610,7 +631,7 @@
             </div>
             <div class="ci-txt">
               <span class="ci-lbl">LinkedIn</span>
-              <span class="ci-val">Ayaan Khan — /in/ayaan-khan-953b34371</span>
+              <span class="ci-val">Ayaan Khan — View LinkedIn Profile</span>
             </div>
             <svg class="ci-arr" width="14" height="14" viewBox="0 0 16 16"
                  fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
@@ -643,7 +664,7 @@
       <span class="foot-m">Built with curiosity.</span>
       <div class="foot-r">
         <button class="print-btn" onclick="window.print()">Print / PDF</button>
-        <span class="foot-yr">&copy; 2025</span>
+        <span class="foot-yr">&copy; 2026</span>
       </div>
     </div>
   </footer>
